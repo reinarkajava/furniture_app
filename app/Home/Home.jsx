@@ -4,6 +4,7 @@ import Header from "@/components/Header";
 import TabMenu from "@/components/TabMenu";
 import { colors } from "@/utils/colors";
 import MaterialIcons from "@expo/vector-icons/MaterialIcons";
+import { useRouter } from "expo-router";
 import React, { useEffect, useState } from "react";
 import {
   Dimensions,
@@ -14,9 +15,12 @@ import {
   Text,
   View,
 } from "react-native";
+
 const { width } = Dimensions.get("window");
 
 export default function Home() {
+  const router = useRouter();
+
   const [selectedCategory, setSelectedCategory] = useState(null);
   const [selectedProducts, setSelectedProducts] = useState(products);
   const [keyWord, setKeyWord] = useState("");
@@ -43,6 +47,7 @@ export default function Home() {
       setSelectedProducts(products);
     }
   }, [selectedCategory, keyWord]);
+
   // category FlatList render item
   const renderCatList = ({ item }) => {
     const isSelected = selectedCategory === item?.id;
@@ -78,7 +83,13 @@ export default function Home() {
   const renderProductList = ({ item, isSelected }) => {
     return (
       <Pressable
-        onPress={() => console.log(item.title)}
+        onPress={() => {
+          // Changed to use the object format which is more reliable for passing params
+          router.push({
+            pathname: "/ProductDetails",
+            params: { id: item.id }
+          });
+        }}
         style={styles.productsContainer}
       >
         <Image
@@ -108,7 +119,6 @@ export default function Home() {
             contentContainerStyle={{
               flexDirection: "row",
               gap: 25,
-              overflowY: "scroll",
             }}
             data={categories}
             renderItem={renderCatList}
@@ -121,6 +131,7 @@ export default function Home() {
           data={selectedProducts}
           renderItem={renderProductList}
           keyExtractor={(item) => item.id.toString()}
+          columnWrapperStyle={{ justifyContent: 'space-between' }}
           ListFooterComponent={<View style={{ height: 80 }} />}
         />
       </View>
@@ -136,7 +147,6 @@ const styles = StyleSheet.create({
     flexDirection: "column",
     justifyContent: "flex-start",
     backgroundColor: colors.white,
-    /* margin: "auto", */
     width: "100%",
     height: "100%",
     padding: 24,
@@ -164,9 +174,7 @@ const styles = StyleSheet.create({
     justifyContent: "space-between",
     gap: 25,
     marginTop: 20,
-    /* marginRight: -60,
-    marginLeft: -20, */
-    marginHorizontal: -100,
+    marginBottom: 20,
     width: "100%",
     zIndex: 5,
   },
@@ -176,14 +184,14 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
   productsContainer: {
-    marginHorizontal: 8,
     marginBottom: 20,
     flexDirection: "column",
     justifyContent: "center",
-    alignItems: "center",
+    alignItems: "flex-start", // Changed to start for better text alignment
+    width: width / 2 - 35, // Adjusted for proper spacing with numColumns
   },
   productImage: {
-    width: width / 2 - 40,
+    width: "100%",
     height: 220,
     borderRadius: 8,
   },
@@ -191,6 +199,7 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: "600",
     color: colors.textGray,
+    marginTop: 8,
   },
   productPrice: {
     fontSize: 14,
